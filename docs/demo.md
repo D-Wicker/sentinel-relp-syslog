@@ -2,8 +2,8 @@
 
 **Objectif** : démontrer que les logs envoyés par un client vers LOG-FRONT-01 sont bien transmis via RELP **et** chiffrés en TLS mutuel, avec une preuve technique (capture réseau) et non une simple absence d'erreur.
 
-**Durée estimée** : 5 à 7 minutes
-**Machines nécessaires** : LOG-FRONT-01 (serveur) + un client déjà déployé (ex: BASTION-FRONT-01)
+
+**Machines nécessaires** : LOG-FRONT-01 (serveur nommé dasn mon contexte a renommer avec le votre) + un client déjà déployé (ex: BASTION-FRONT-01)
 **Deux terminaux ouverts en parallèle** : un sur LOG-FRONT-01, un sur le client
 
 ---
@@ -41,13 +41,13 @@ tcp   LISTEN 0  55    0.0.0.0:6514   0.0.0.0:*   (flux RELP+mTLS, notre ajout)
 
 ```
 
-> **Point oral** : "Le port 514 correspond au flux syslog historique de l'infrastructure, en clair. Le port 6514 est le nouveau flux RELP que nous avons ajouté, chiffré et authentifié par certificat, sans toucher à l'existant."
+> **Point technique** : "Le port 514 correspond au flux syslog historique de l'infrastructure, en clair. Le port 6514 est le nouveau flux RELP que nous avons ajouté, chiffré et authentifié par certificat, sans toucher à l'existant."
 
 ---
 
 ## Étape 2 — Lancer la capture réseau AVANT d'envoyer le message
 
-**Sur LOG-FRONT-01**, lancer la capture en la limitant dans le temps pour ne pas avoir à l'arrêter manuellement devant le jury :
+**Sur LOG-FRONT-01**, lancer la capture en la limitant dans le temps pour ne pas avoir à l'arrêter manuellement :
 
 ```
 sudo timeout 20 tcpdump -i any port 6514 -X -w /tmp/demo-capture.pcap
@@ -89,7 +89,7 @@ Revenir sur le terminal LOG-FRONT-01. La capture affiche des paquets de ce type 
     0x0040:  aab2 4c42 3902 f9f8 d94c 39a2 14c4 7670  ..LB9....L9...vp
 ```
 
-> **Point à montrer** : à l'offset `0x0030`, la séquence `17 03 03` est la signature d'un enregistrement TLS 1.2 de type "Application Data". Tout ce qui suit est du binaire chiffré illisible — c'est visible à l'œil nu dans la colonne ASCII de droite, qui n'affiche que des points (caractères non imprimables), aucune lettre du message envoyé.
+> **Point démontrer a ce stade** : à l'offset `0x0030`, la séquence `17 03 03` est la signature d'un enregistrement TLS 1.2 de type "Application Data". Tout ce qui suit est du binaire chiffré illisible — c'est visible à l'œil nu dans la colonne ASCII de droite, qui n'affiche que des points (caractères non imprimables), aucune lettre du message envoyé.
 
 ---
 
@@ -98,19 +98,19 @@ Revenir sur le terminal LOG-FRONT-01. La capture affiche des paquets de ce type 
 C'est l'étape la plus parlante : prouver par la négative que le message n'existe nulle part en clair.
 
 ```
-sudo tcpdump -r /tmp/demo-capture.pcap -A | grep -i "DEMO-JURY"
+sudo tcpdump -r /tmp/demo-capture.pcap -A | grep -i "DEMO-de-CHIFFREMENT"
 
 ```
 
 **Résultat attendu : aucune ligne affichée.**
 
-> **Point à dire** : "Si le trafic n'était pas réellement chiffré — TLS mal configuré, ou désactivé silencieusement — cette commande aurait retrouvé le texte du message que nous venons d'envoyer. Le fait qu'elle ne retourne rien est la preuve que le contenu a bien transité chiffré sur le réseau, et pas seulement que la configuration l'affirme."
+> **Point technique** : "Si le trafic n'était pas réellement chiffré — TLS mal configuré, ou désactivé silencieusement — cette commande aurait retrouvé le texte du message que nous venons d'envoyer. Le fait qu'elle ne retourne rien est la preuve que le contenu a bien transité chiffré sur le réseau, et pas seulement que la configuration l'affirme."
 
 ---
 
 ## Étape 6 — Preuve positive : le message est bien arrivé côté serveur
 
-Pour clore la démonstration, montrer que le message a malgré tout été reçu et traité correctement — le chiffrement n'empêche pas la livraison, il protège juste le contenu en transit :
+Pour clore la démo, on montre que le message a malgré tout été reçu et traité correctement — le chiffrement n'empêche pas la livraison, il protège juste le contenu en transit :
 
 ```
 sudo tail -1 /var/log/remote-relp/BASTION-FRONT-01.log
@@ -120,7 +120,7 @@ sudo tail -1 /var/log/remote-relp/BASTION-FRONT-01.log
 **Résultat attendu** :
 
 ```
-2026-07-13T16:06:42.xxxxxx+00:00 BASTION-FRONT-01 kasgrunt: DEMO-JURY-160642 - Ceci est un message secret en clair
+2026-07-13T16:06:42.xxxxxx+00:00 BASTION-FRONT-01 user/standard: DEMO-de-CHIFFREMENT160642 - Ceci est un message secret en clair
 
 ```
 
@@ -134,7 +134,7 @@ sudo tail -1 /var/log/remote-relp/BASTION-FRONT-01.log
 |---|----------|----------|-------------------|
 | 1 | LOG-FRONT-01 | `ss -tulnp \| grep -E ':514\|:6514'`                                    | Le flux RELP est isolé du flux existant |
 | 2 | LOG-FRONT-01 | `sudo timeout 20 tcpdump -i any port 6514 -X -w /tmp/demo-capture.pcap` | Lance la capture |
-| 3 | Client       | `logger "DEMO-JURY-$(date +%H%M%S) - ..."`                              | Génère un message identifiable |
+| 3 | Client       | `logger "DEMO--$(date +%H%M%S) - ..."`                                  | Génère un message identifiable |
 | 4 | LOG-FRONT-01 | *(lecture directe de la sortie tcpdump)*                                | En-tête TLS visible, contenu illisible |
 | 5 | LOG-FRONT-01 | `sudo tcpdump -r /tmp/demo-capture.pcap -A \| grep -i "DEMO-JURY"`      | Aucun résultat = chiffrement prouvé |
 | 6 | LOG-FRONT-01 | `sudo tail -1 /var/log/remote-relp/BASTION-FRONT-01.log`                | Le message est bien arrivé et déchiffré côté serveur |

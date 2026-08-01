@@ -1,10 +1,10 @@
 #!/bin/bash
-set -e
+set -e               # stop le script si une commande échoue
 
-# Exécuté SUR LOG-FRONT-01 (là où se trouve ca-key.pem, jamais
-# copiée vers les clients). A relancer une fois par VM cliente
-# (BASTION-FRONT-01, SQL-FRONT-01, PBX-FRONT-01, ZAB-FRONT-01...).
-# Usage : ./generate-client-cert.sh <CN_DE_LA_MACHINE>
+# Exécuté SUR LOG-FRONT-01 (exemple de nommage sur ma VM a créatoin du LAB, 
+# là où se trouve ca-key.pem, jamais copiée vers les clients). A relancer une fois par VM cliente
+# (BASTION-FRONT-01, SQL-FRONT-01, PBX-FRONT-01, ZAB-FRONT-01, ici a titre d'exemple...).
+# Usage : ./generate-client-cert.sh <NOM_DE_LA_MACHINE>
 # Exemple : ./generate-client-cert.sh BASTION-FRONT-01
 
 CERTS_DIR="$(dirname "$0")/../server/certs"
@@ -46,6 +46,12 @@ openssl x509 -req \
   -CAcreateserial -out "$CERTS_DIR/${CN}-cert.pem" -days 365
 
 chmod 600 "$CERTS_DIR/${CN}-key.pem"
+# Restreint la clé privée du client en lecture/écriture au seul
+# propriétaire du fichier : c'est le matériel cryptographique qui
+# prouve l'identité de cette machine auprès du serveur RELP (mTLS).
+# Si un autre utilisateur du système pouvait la lire, il pourrait
+# usurper l'identité de ce client — même principe de moindre
+# privilège que pour ca-key.pem, à l'échelle d'une seule machine.
 
 echo "=== Terminé pour $CN ==="
 echo "Fichiers à transférer vers $CN : ${CN}-key.pem, ${CN}-cert.pem, ca-cert.pem"

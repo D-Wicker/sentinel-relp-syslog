@@ -1,6 +1,6 @@
 # Centralisation de logs sécurisée — rsyslog RELP + mTLS
 
-> Lab réseau/sécurité réalisé en License 3 Systèmes Réseaux & Cloud Computing (module LPIC-102) : mise en place d'une remontée de logs chiffrée et authentifiée par certificat entre plusieurs machines Linux, sans casser le flux syslog existant.
+> Lab réseau/sécurité réalisé en License L3 Systèmes Réseaux & Cloud Computing (module LPIC-102) : mise en place d'une remontée de logs chiffrée et authentifiée par certificat entre plusieurs machines Linux, sans casser le flux syslog existant.
 
 ## Contexte
 
@@ -50,7 +50,7 @@ Le dossier [`docs/demo.md`](docs/demo.md) détaille un scénario complet de dém
 ./server/generate-ca-and-server.sh
 
 # 2. Sur le serveur : génère un certificat par machine cliente
-./client/generate-client-cert.sh BASTION-FRONT-01
+./client/generate-client-cert.sh BASTION-FRONT-01 (ou nom de la machine)
 
 # 3. Déployer relp-server.conf sur le serveur, relp-client.conf sur chaque client
 #    (remplacer __CN__ dans relp-client.conf par le hostname exact de la machine)

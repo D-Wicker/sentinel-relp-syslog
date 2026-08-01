@@ -1,6 +1,6 @@
 #!/bin/bash
 # Active le mode strict : le script s'arrête immédiatement si une commande échoue
-set -e
+set -e # stop le script si une commande échoue
 
 # A EXECUTER UNE SEULE FOIS, UNIQUEMENT SUR LOG-FRONT-01.
 # La clé privée de la CA (ca-key.pem) ne doit JAMAIS quitter cette
@@ -31,6 +31,12 @@ openssl req -x509 -newkey rsa:4096 \
 # Verrouille immédiatement les permissions de la clé privée de la
 # CA — le fichier le plus critique de toute cette PKI.
 chmod 600 "$CERTS_DIR/ca-key.pem"
+# Restreint la clé privée du client en lecture/écriture au seul
+# propriétaire du fichier : c'est le matériel cryptographique qui
+# prouve l'identité de cette machine auprès du serveur RELP (mTLS).
+# Si un autre utilisateur du système pouvait la lire, il pourrait
+# usurper l'identité de ce client — même principe de moindre
+# privilège que pour ca-key.pem, à l'échelle d'une seule machine.
 
 echo "=== Génération clé + CSR serveur ==="
 # Le CN correspond au hostname réel du serveur RELP, pour cohérence
@@ -49,17 +55,23 @@ openssl x509 -req \
   -CAcreateserial -out "$CERTS_DIR/server-cert.pem" -days 365
 
 chmod 600 "$CERTS_DIR/server-key.pem"
+# Restreint la clé privée du client en lecture/écriture au seul
+# propriétaire du fichier : c'est le matériel cryptographique qui
+# prouve l'identité de cette machine auprès du serveur RELP (mTLS).
+# Si un autre utilisateur du système pouvait la lire, il pourrait
+# usurper l'identité de ce client — même principe de moindre
+# privilège que pour ca-key.pem, à l'échelle d'une seule machine.
 
 echo "=== Déploiement vers /etc/rsyslog.d/certs/ ==="
 sudo mkdir -p /etc/rsyslog.d/certs
 sudo cp "$CERTS_DIR/ca-cert.pem" "$CERTS_DIR/server-cert.pem" "$CERTS_DIR/server-key.pem" /etc/rsyslog.d/certs/
 
-# rsyslog-svc doit pouvoir lire ces fichiers APRES le drop de
-# privilèges ($PrivDropToUser, en fin de relp-server.conf).
-sudo chown rsyslog-svc:rsyslog-svc /etc/rsyslog.d/certs/server-key.pem
+# root lit tout : ces certificats/clé n'ont pas besoin d'un
+# propriétaire dédié puisque rsyslogd tourne en root sur cette
+# machine (voir section 7 — abandon assumé du drop de privilèges).
+sudo chown root:root /etc/rsyslog.d/certs/ca-cert.pem /etc/rsyslog.d/certs/server-cert.pem /etc/rsyslog.d/certs/server-key.pem
 sudo chmod 600 /etc/rsyslog.d/certs/server-key.pem
-sudo chown root:rsyslog-svc /etc/rsyslog.d/certs/ca-cert.pem /etc/rsyslog.d/certs/server-cert.pem
-sudo chmod 640 /etc/rsyslog.d/certs/ca-cert.pem /etc/rsyslog.d/certs/server-cert.pem
+sudo chmod 644 /etc/rsyslog.d/certs/ca-cert.pem /etc/rsyslog.d/certs/server-cert.pem
 
 echo "=== Terminé. ca-key.pem NE DOIT JAMAIS quitter cette machine. ==="
 ls -la "$CERTS_DIR"
