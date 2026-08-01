@@ -1,0 +1,15 @@
+# Certificats et clés — générés localement par les scripts, jamais commités
+certs/
+*.pem
+*.key
+*.srl
+
+# Captures réseau (démo)
+*.pcap
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
