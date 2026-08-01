@@ -38,10 +38,11 @@ sequenceDiagram
 Le dossier [`docs/demo.md`](docs/demo.md) détaille un scénario complet de démonstration en 6 étapes, avec `tcpdump` :
 
 1. Le port `6514` (RELP+TLS) est bien isolé du port `514` existant.
-2. Un message identifiable est envoyé côté client.
-3. La capture réseau confirme un enregistrement TLS "Application Data" (`17 03 03`), illisible en clair.
-4. **Preuve négative** : le message envoyé n'apparaît nulle part dans la capture brute → confirme que le chiffrement est réel, pas juste déclaré dans la conf.
-5. **Preuve positive** : le message arrive bien en clair dans le fichier de log côté serveur → le déchiffrement a eu lieu après authentification mutuelle, pas parce que le réseau laissait passer du clair.
+2. Lancement de la capture réseau `tcpdump` avant l'envoi.
+3. Un message identifiable est envoyé côté client.
+4. La capture réseau confirme un enregistrement TLS "Application Data" (`17 03 03`), illisible en clair.
+5. **Preuve négative** : le message envoyé n'apparaît nulle part dans la capture brute → confirme que le chiffrement est réel, pas juste déclaré dans la conf.
+6. **Preuve positive** : le message arrive bien en clair dans le fichier de log côté serveur → le déchiffrement a eu lieu après authentification mutuelle, pas parce que le réseau laissait passer du clair.
 
 ## Reproduire le lab
 
