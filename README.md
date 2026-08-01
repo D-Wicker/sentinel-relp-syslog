@@ -61,8 +61,6 @@ sudo systemctl restart rsyslog
 
 # 5. Tester
 logger "Test RELP+mTLS"
-
-
 ```
 Documentation détaillée, ligne par ligne, des deux fichiers de configuration :
 - [`docs/server-config.md`](docs/server-config.md)
@@ -72,7 +70,6 @@ Documentation détaillée, ligne par ligne, des deux fichiers de configuration :
 
 - **Pas de drop de privilèges** (`rsyslogd` tourne en root) : une seule instance rsyslogd sur la VM gère à la fois ce flux RELP et la conf système existante (`/var/log/auth.log`, etc.), qui nécessite des droits root/adm. Isoler proprement le drop de privilèges au seul flux RELP demanderait une seconde instance rsyslogd dédiée — hors périmètre de ce lab, documenté comme piste d'amélioration.
 - **PKI volontairement simple** (CA auto-signée, pas de révocation/CRL) : suffisant pour un lab, insuffisant en production où une vraie gestion de cycle de vie des certificats (rotation, révocation) serait nécessaire.
-```
 
 ```
 ## Documentation technique d'un sujet sécuritée rencontrer interressant
