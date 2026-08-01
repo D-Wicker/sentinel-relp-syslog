@@ -71,7 +71,6 @@ Documentation détaillée, ligne par ligne, des deux fichiers de configuration :
 - **Pas de drop de privilèges** (`rsyslogd` tourne en root) : une seule instance rsyslogd sur la VM gère à la fois ce flux RELP et la conf système existante (`/var/log/auth.log`, etc.), qui nécessite des droits root/adm. Isoler proprement le drop de privilèges au seul flux RELP demanderait une seconde instance rsyslogd dédiée — hors périmètre de ce lab, documenté comme piste d'amélioration.
 - **PKI volontairement simple** (CA auto-signée, pas de révocation/CRL) : suffisant pour un lab, insuffisant en production où une vraie gestion de cycle de vie des certificats (rotation, révocation) serait nécessaire.
 
-```
 ## Documentation technique d'un sujet sécuritée rencontrer interressant
 
 **pourquoi un compte de service rsyslog-svc a été envisagé, puis abandonné**
@@ -85,7 +84,6 @@ Documentation détaillée, ligne par ligne, des deux fichiers de configuration :
 **Décision retenue et justification :** abandon du drop de privilèges. Isoler correctement ce mécanisme au seul flux RELP nécessiterait une seconde instance rsyslogd dédiée, avec son propre processus, sa propre configuration et ses propres permissions — une architecture à part entière, hors du périmètre de ce module. Le choix a donc été de conserver le comportement par défaut du paquet Debian (root), documenté explicitement comme un compromis assumé plutôt que comme un oubli, avec la seconde instance dédiée identifiée comme piste d'amélioration possible.
 
 **Conséquence sur les permissions :** le chown rsyslog-svc:rsyslog-svc devenu sans objet a été retiré des scripts — rsyslogd tournant en root, les certificats et clés appartiennent désormais à root:root, ce qui est suffisant puisque root peut lire n'importe quel fichier indépendamment de son propriétaire déclaré.
-```
 
 ## Stack
 
