@@ -50,7 +50,6 @@ Le dossier [`docs/demo.md`](docs/demo.md) détaille un scénario complet de dém
 + # Cloner le repo
 + git clone https://github.com/D-Wicker/sentinel-relp-syslog.git
 + cd sentinel-relp-syslog
-
 ```
 
 # 1. Sur le serveur (une seule fois) : génère la CA + le certificat serveur
@@ -60,7 +59,9 @@ Le dossier [`docs/demo.md`](docs/demo.md) détaille un scénario complet de dém
 ./client/generate-client-cert.sh BASTION-FRONT-01 (ou nom de la machine)
 
 # 3. Déployer relp-server.conf sur le serveur, relp-client.conf sur chaque client
-#    (remplacer __CN__ dans relp-client.conf par le hostname exact de la machine)
+```
+    (remplacer __CN__ dans relp-client.conf par le hostname exact de la machine)
+```
 
 # 4. Redémarrer rsyslog des deux côtés
 sudo systemctl restart rsyslog
