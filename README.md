@@ -45,8 +45,15 @@ Le dossier [`docs/demo.md`](docs/demo.md) détaille un scénario complet de dém
 6. **Preuve positive** : le message arrive bien en clair dans le fichier de log côté serveur → le déchiffrement a eu lieu après authentification mutuelle, pas parce que le réseau laissait passer du clair.
 
 ## Reproduire le lab
+## Reproduire le lab
 
-```bash
+```
++ # Cloner le repo
++ git clone https://github.com/D-Wicker/sentinel-relp-syslog.git
++ cd sentinel-relp-syslog
++
+```
+
 # 1. Sur le serveur (une seule fois) : génère la CA + le certificat serveur
 ./server/generate-ca-and-server.sh
 
